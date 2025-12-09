@@ -1,0 +1,49 @@
+\subsubsection*{Verhalten von Microsoft Edge}
+
+Da Microsoft Edge seit der Neuausrichtung 2020 vollständig auf der Chromium-Engine basiert, 
+übernimmt der Browser das gleiche Widerrufsmodell wie Google Chrome. Klassische PKI-Mechanismen – 
+insbesondere CRLs über CDP-Einträge und OCSP-Abfragen über das AIA-Feld – werden auch von Edge 
+nicht ausgewertet. Die Gründe entsprechen im Wesentlichen denen von Chrome:
+
+\begin{itemize}
+\item \textbf{Performance}: Edge führt keine OCSP-Abfragen durch und lädt keine CRLs, um Netzwerkverzögerungen zu vermeiden.
+\item \textbf{Stabilität}: Microsoft folgt der Chromium-Architektur, die große CRLs und potenzielle Zeitüberschreitungen als unzuverlässig einstuft.
+\item \textbf{Datenschutz}: Wie Chrome würde auch Edge durch OCSP jede aufgerufene Website gegenüber dem OCSP-Responder offenlegen.
+\end{itemize}
+
+Damit ignoriert Edge – trotz korrekt gesetzter Felder im Zertifikat – sowohl CRL Distribution Points als auch OCSP-Responder-URLs und ersetzt die klassischen PKI-Widerrufsmechanismen durch Chromium-eigene Strukturen.
+
+\paragraph*{CRLSets in Microsoft Edge}
+
+Microsoft Edge bezieht dieselben \textit{CRLSets}, die Google für Chromium bereitstellt. Die Funktionsweise unterscheidet sich nicht:
+
+\begin{itemize}
+\item Die Datenbasis stammt ausschließlich von Google.
+\item Nur sicherheitsrelevante, global bedeutende Widerrufe werden aufgenommen (z.,B. kompromittierte CAs).
+\item End-Entity-Zertifikate werden praktisch nie berücksichtigt.
+\item Private PKIs werden grundsätzlich ignoriert.
+\end{itemize}
+
+Edge erweitert CRLSets nicht durch eigene Widerrufslisten und betreibt auch keine eigene Infrastruktur für OCSP-Stapling oder CRL-Verteilung für interne Zertifizierungsstellen.
+
+\subparagraph*{Einschränkungen in Edge}
+
+Die Einschränkungen entsprechen denen von Chrome:
+
+\begin{itemize}
+\item \textbf{Keine Unterstützung privater CRLs}: Edge ruft selbst veröffentlichte CRLs nicht ab.
+\item \textbf{Keine OCSP-Nutzung}: Auch ein intern erreichbarer OCSP-Responder wird nicht abgefragt.
+\item \textbf{Ignorieren privater CAs}: CRLSets enthalten ausschließlich Widerrufe aus dem öffentlichen WebPKI-Ökosystem.
+\item \textbf{Widerrufe werden nicht erkannt}: Interne, widerrufene Serverzertifikate werden weiterhin als gültig angezeigt.
+\end{itemize}
+
+\subsubsection*{Problemstellung: Private CA und Widerruf in Microsoft Edge}
+
+Durch die vollständige Übernahme des Chromium-Sicherheitsmodells ergeben sich für Edge im Laboraufbau exakt dieselben Probleme wie bei Chrome:
+
+\begin{itemize}
+\item Die im Zertifikat hinterlegte CRL wird nicht abgerufen.
+\item OCSP findet nicht statt, selbst wenn ein interner Responder korrekt bereitsteht.
+\item Widerrufe in einer privaten PKI werden grundsätzlich nicht berücksichtigt.
+\item Edge zeigt widerrufene Zertifikate weiterhin als vertrauenswürdig an.
+\end{itemize}
